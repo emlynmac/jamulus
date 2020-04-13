@@ -522,12 +522,12 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
         stPropertyAddress.mScope    = kAudioObjectPropertyScopeOutput;
         iPropertySize               = sizeof ( CFStringRef );
 
-        AudioObjectGetPropertyData ( audioOutputDevice[iDriverIdx],
+        CheckError(AudioObjectGetPropertyData ( audioOutputDevice[iDriverIdx],
                                      &stPropertyAddress,
                                      0,
                                      NULL,
                                      &iPropertySize,
-                                     &sPropertyStringValue );
+                                     &sPropertyStringValue ), "Failed to get name of out chan");
 
         // convert string
         const bool bConvOK = ConvertCFStringToQString ( sPropertyStringValue,
@@ -536,6 +536,7 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
         // add the "[n]:" at the beginning as is in the Audio-Midi-Setup
         if ( !bConvOK || ( iPropertySize == 0 ) )
         {
+            qDebug() << "defaulting name";
             // use a defalut name in case there was an error or the name is empty
             sChannelNamesOutput[iCurOutCH] =
                 QString ( "%1: Channel %1" ).arg ( iCurOutCH + 1 );
@@ -731,7 +732,9 @@ UInt32 CSound::SetBufferSize ( AudioDeviceID& audioDeviceID,
 
     if ( bIsInput ) {
         stPropertyAddress.mScope = kAudioDevicePropertyScopeInput;
+        qDebug() << "Setting input buffer size to" << iPrefBufferSize << "on" << audioDeviceID;
     } else {
+        qDebug() << "Setting output buffer size to" << iPrefBufferSize << "on" << audioDeviceID;
         stPropertyAddress.mScope = kAudioDevicePropertyScopeOutput;
     }
     stPropertyAddress.mElement = kAudioObjectPropertyElementMaster;
@@ -739,12 +742,12 @@ UInt32 CSound::SetBufferSize ( AudioDeviceID& audioDeviceID,
     // first set the value
     UInt32 iSizeBufValue = sizeof ( UInt32 );
 
-    AudioObjectSetPropertyData ( audioDeviceID,
+    CheckError(AudioObjectSetPropertyData ( audioDeviceID,
                                  &stPropertyAddress,
                                  0,
                                  NULL,
                                  iSizeBufValue,
-                                 &iPrefBufferSize );
+                                 &iPrefBufferSize), "Not Set" );
 
     // read back which value is actually used
     UInt32 iActualMonoBufferSize = 0;
@@ -872,9 +875,28 @@ OSStatus CSound::outCallbackIO ( AudioDeviceID          inDevice,
 
     if ( inDevice == pSound->CurrentAudioOutputDeviceID )
     {
-        // check size (float32 has four bytes)
         if ( outOutputData->mBuffers[0].mDataByteSize ==
+            static_cast<UInt32> ( iCoreAudioBufferSizeMono * iNumOutChan * 4 ) )
+        {
+            // Outputs are to individual buffers too, rather than using channels
+            Float32* pLeftOutData = static_cast<Float32*> ( outOutputData->mBuffers[iSelOutputLeftChannel].mData );
+            Float32* pRightOutData = static_cast<Float32*> ( outOutputData->mBuffers[iSelOutputRightChannel].mData );
+            
+            // copy output data
+            for ( int i = 0; i < iCoreAudioBufferSizeMono; i++ )
+            {
+                // left
+                pLeftOutData[i] =
+                (Float32) pSound->vecsTmpAudioSndCrdStereo[2 * i] / _MAXSHORT;
+                
+                // right
+                pRightOutData[i] =
+                (Float32) pSound->vecsTmpAudioSndCrdStereo[2 * i + 1] / _MAXSHORT;
+            }
+            
+        } else if ( outOutputData->mBuffers[0].mDataByteSize ==
              static_cast<UInt32> ( iCoreAudioBufferSizeMono * iNumOutChan * 4 ) )
+                // check size (float32 has four bytes)
         {
             // get a pointer to the input data of the correct type
             Float32* pOutData = static_cast<Float32*> ( outOutputData->mBuffers[0].mData );
