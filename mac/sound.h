@@ -94,15 +94,23 @@ protected:
     static OSStatus deviceNotification ( AudioDeviceID,
                                          UInt32,
                                          const AudioObjectPropertyAddress* inAddresses,
-                                         void*                             inRefCon );
-
-    static OSStatus callbackIO ( AudioDeviceID          inDevice,
-                                 const AudioTimeStamp*,
-                                 const AudioBufferList* inInputData,
-                                 const AudioTimeStamp*,
-                                 AudioBufferList*       outOutputData,
-                                 const AudioTimeStamp*,
-                                 void*                  inRefCon );
+                                        void*                             inRefCon );
+    
+    static OSStatus inCallbackIO ( AudioDeviceID          inDevice,
+                                  const AudioTimeStamp*,
+                                  const AudioBufferList* inInputData,
+                                  const AudioTimeStamp*,
+                                  AudioBufferList*       outOutputData,
+                                  const AudioTimeStamp*,
+                                  void*                  inRefCon );
+    
+    static OSStatus outCallbackIO ( AudioDeviceID          inDevice,
+                                   const AudioTimeStamp*,
+                                   const AudioBufferList* inInputData,
+                                   const AudioTimeStamp*,
+                                   AudioBufferList*       outOutputData,
+                                   const AudioTimeStamp*,
+                                   void*                  inRefCon );
 
     static void callbackMIDI ( const MIDIPacketList* pktlist,
                                void*                 refCon,

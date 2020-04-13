@@ -616,12 +616,12 @@ void CSound::Start()
 
     // register the callback function for input and output
     CheckError(AudioDeviceCreateIOProcID ( audioInputDevice[lCurDev],
-                                callbackIO,
+                                inCallbackIO,
                                 this,
                                 &audioInputProcID ), "Failed to register input callback");
 
     CheckError(AudioDeviceCreateIOProcID ( audioOutputDevice[lCurDev],
-                                callbackIO,
+                                outCallbackIO,
                                 this,
                                 &audioOutputProcID ), "Failed to register output callback");
 
@@ -781,11 +781,11 @@ OSStatus CSound::deviceNotification ( AudioDeviceID,
     return noErr;
 }
 
-OSStatus CSound::callbackIO ( AudioDeviceID          inDevice,
+OSStatus CSound::inCallbackIO ( AudioDeviceID          inDevice,
                               const AudioTimeStamp*,
                               const AudioBufferList* inInputData,
                               const AudioTimeStamp*,
-                              AudioBufferList*       outOutputData,
+                              AudioBufferList*,
                               const AudioTimeStamp*,
                               void*                  inRefCon )
 {
@@ -796,11 +796,8 @@ OSStatus CSound::callbackIO ( AudioDeviceID          inDevice,
 
     const int iCoreAudioBufferSizeMono = pSound->iCoreAudioBufferSizeMono;
     const int iNumInChan               = pSound->iNumInChan;
-    const int iNumOutChan              = pSound->iNumOutChan;
     const int iSelInputLeftChannel     = pSound->iSelInputLeftChannel;
     const int iSelInputRightChannel    = pSound->iSelInputRightChannel;
-    const int iSelOutputLeftChannel    = pSound->iSelOutputLeftChannel;
-    const int iSelOutputRightChannel   = pSound->iSelOutputRightChannel;
 
     if ( inDevice == pSound->CurrentAudioInputDeviceID )
     {
@@ -852,6 +849,26 @@ OSStatus CSound::callbackIO ( AudioDeviceID          inDevice,
         // call processing callback function
         pSound->ProcessCallback ( pSound->vecsTmpAudioSndCrdStereo );
     }
+    return kAudioHardwareNoError;
+}
+
+OSStatus CSound::outCallbackIO ( AudioDeviceID          inDevice,
+                              const AudioTimeStamp*,
+                              const AudioBufferList*,
+                              const AudioTimeStamp*,
+                              AudioBufferList*       outOutputData,
+                              const AudioTimeStamp*,
+                              void*                  inRefCon )
+{
+    CSound* pSound = static_cast<CSound*> ( inRefCon );
+
+    // both, the input and output device use the same callback function
+    QMutexLocker locker ( &pSound->Mutex );
+
+    const int iCoreAudioBufferSizeMono = pSound->iCoreAudioBufferSizeMono;
+    const int iNumOutChan              = pSound->iNumOutChan;
+    const int iSelOutputLeftChannel    = pSound->iSelOutputLeftChannel;
+    const int iSelOutputRightChannel   = pSound->iSelOutputRightChannel;
 
     if ( inDevice == pSound->CurrentAudioOutputDeviceID )
     {
