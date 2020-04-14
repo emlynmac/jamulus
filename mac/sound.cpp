@@ -875,8 +875,7 @@ OSStatus CSound::outCallbackIO ( AudioDeviceID          inDevice,
 
     if ( inDevice == pSound->CurrentAudioOutputDeviceID )
     {
-        if ( outOutputData->mBuffers[0].mDataByteSize ==
-            static_cast<UInt32> ( iCoreAudioBufferSizeMono * iNumOutChan * 4 ) )
+        if ( outOutputData->mNumberBuffers == (UInt32)iNumOutChan )
         {
             // Outputs are to individual buffers too, rather than using channels
             Float32* pLeftOutData = static_cast<Float32*> ( outOutputData->mBuffers[iSelOutputLeftChannel].mData );
