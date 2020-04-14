@@ -30,7 +30,27 @@
 #include <QMutex>
 #include "soundbase.h"
 #include "global.h"
+#include "AudioDevice.h"
 
+#define checkErr( err) \
+if(err) {\
+    OSStatus error = static_cast<OSStatus>(err);\
+        fprintf(stdout, "CSound Error: %ld ->  %s:  %d\n",  (long)error,\
+               __FILE__, \
+               __LINE__\
+               );\
+                   fflush(stdout);\
+        return err; \
+}
+#define verify_noerr( err) \
+if(err) {\
+    OSStatus error = static_cast<OSStatus>(err);\
+        fprintf(stdout, "CSound Error: %ld ->  %s:  %d\n",  (long)error,\
+               __FILE__, \
+               __LINE__\
+               );\
+                   fflush(stdout);\
+}
 
 /* Classes ********************************************************************/
 class CSound : public CSoundBase
@@ -121,4 +141,47 @@ protected:
     QString             sChannelNamesOutput[MAX_NUM_IN_OUT_CHANNELS];
 
     QMutex              Mutex;
+    
+    
+    OSStatus    SetInputDeviceAsCurrent(AudioDeviceID in);
+    OSStatus    SetOutputDeviceAsCurrent(AudioDeviceID out);
+    
+private:
+    OSStatus SetupGraph(AudioDeviceID out);
+    OSStatus MakeGraph();
+    bool IsCARunning();
+    void ComputeThruOffset();
+    
+    OSStatus SetupAUHAL(AudioDeviceID in);
+    OSStatus EnableIO();
+    OSStatus CallbackSetup();
+    
+    static OSStatus InputProc(void *inRefCon,
+                              AudioUnitRenderActionFlags *ioActionFlags,
+                              const AudioTimeStamp *inTimeStamp,
+                              UInt32                inBusNumber,
+                              UInt32                inNumberFrames,
+                              AudioBufferList *        ioData);
+    
+    static OSStatus OutputProc(void *inRefCon,
+                               AudioUnitRenderActionFlags *ioActionFlags,
+                               const AudioTimeStamp *inTimeStamp,
+                               UInt32                inBusNumber,
+                               UInt32                inNumberFrames,
+                               AudioBufferList *    ioData);
+    
+    AudioUnit mInputUnit;
+    AudioBufferList *mInputBuffer;
+    AudioDevice mInputDevice, mOutputDevice;
+    
+    AUGraph mGraph;
+    AUNode mVarispeedNode;
+    AudioUnit mVarispeedUnit;
+    AUNode mOutputNode;
+    AudioUnit mOutputUnit;
+    
+    //Buffer sample info
+    Float64 mFirstInputTime;
+    Float64 mFirstOutputTime;
+    Float64 mInToOutSampleOffset;
 };

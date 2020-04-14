@@ -21,7 +21,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
-
+#include <AudioToolbox/AudioToolbox.h>
 #include "sound.h"
 
 
@@ -591,6 +591,34 @@ void CSound::SetRightOutputChannel ( const int iNewChan )
 
 void CSound::Start()
 {
+    if(!IsCARunning()) {
+        OSStatus err = SetupAUHAL(audioInputDevice[lCurDev]);
+        verify_noerr(err);
+        
+        // Setup Graph containing Varispeed Unit & Default Output Unit
+        err = SetupGraph(audioOutputDevice[lCurDev]);
+        verify_noerr(err);
+                
+        // the varispeed unit should only be conected after the input and output formats have been set
+        err = AUGraphConnectNodeInput(mGraph, mVarispeedNode, 0, mOutputNode, 0);
+        verify_noerr(err);
+        
+        err = AUGraphInitialize(mGraph);
+        verify_noerr(err);
+        
+        //Start pulling for audio data
+        err = AudioOutputUnitStart(mInputUnit);
+        verify_noerr(err);
+        
+        err = AUGraphStart(mGraph);
+        verify_noerr(err);
+        
+        //reset sample times
+        mFirstInputTime = -1;
+        mFirstOutputTime = -1;
+        
+        bRun = true;
+    
     AudioObjectPropertyAddress stPropertyAddress;
 
     stPropertyAddress.mElement  = kAudioObjectPropertyElementMaster;
@@ -616,36 +644,237 @@ void CSound::Start()
                                      &stPropertyAddress,
                                      deviceNotification,
                                      this );
-
-    // register the callback function for input and output
-    AudioDeviceCreateIOProcID ( audioInputDevice[lCurDev],
-                                callbackIO,
-                                this,
-                                &audioInputProcID );
-
-    AudioDeviceCreateIOProcID ( audioOutputDevice[lCurDev],
-                                callbackIO,
-                                this,
-                                &audioOutputProcID );
-
-    // start the audio stream
-    AudioDeviceStart ( audioInputDevice[lCurDev], audioInputProcID );
-    AudioDeviceStart ( audioOutputDevice[lCurDev], audioOutputProcID );
-
-    // call base class
-    CSoundBase::Start();
+//
+//    // register the callback function for input and output
+//    AudioDeviceCreateIOProcID ( audioInputDevice[lCurDev],
+//                                callbackIO,
+//                                this,
+//                                &audioInputProcID );
+//
+//    AudioDeviceCreateIOProcID ( audioOutputDevice[lCurDev],
+//                                callbackIO,
+//                                this,
+//                                &audioOutputProcID );
+//
+//    // start the audio stream
+//    AudioDeviceStart ( audioInputDevice[lCurDev], audioInputProcID );
+//    AudioDeviceStart ( audioOutputDevice[lCurDev], audioOutputProcID );
+//
+        // call base class
+        CSoundBase::Start();
+    }
 }
+
+OSStatus CSound::SetupAUHAL(AudioDeviceID in)
+{
+    OSStatus err = noErr;
+    
+    AudioComponent comp;
+    AudioComponentDescription desc;
+    
+    //There are several different types of Audio Units.
+    //Some audio units serve as Outputs, Mixers, or DSP
+    //units. See AUComponent.h for listing
+    desc.componentType = kAudioUnitType_Output;
+    
+    //Every Component has a subType, which will give a clearer picture
+    //of what this components function will be.
+    desc.componentSubType = kAudioUnitSubType_HALOutput;
+    
+    //all Audio Units in AUComponent.h must use
+    //"kAudioUnitManufacturer_Apple" as the Manufacturer
+    desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+    desc.componentFlags = 0;
+    desc.componentFlagsMask = 0;
+    
+    //Finds a component that meets the desc spec's
+    comp = AudioComponentFindNext(NULL, &desc);
+    if (comp == NULL) exit (-1);
+    
+    //gains access to the services provided by the component
+    err = AudioComponentInstanceNew(comp, &mInputUnit);
+    checkErr(err);
+    
+    //AUHAL needs to be initialized before anything is done to it
+    err = AudioUnitInitialize(mInputUnit);
+    checkErr(err);
+    
+    err = EnableIO();
+    checkErr(err);
+    
+    err= SetInputDeviceAsCurrent(in);
+    checkErr(err);
+    
+    err = CallbackSetup();
+    checkErr(err);
+    
+    //Don't setup buffers until you know what the
+    //input and output device audio streams look like.
+    
+    err = AudioUnitInitialize(mInputUnit);
+    
+    return err;
+}
+
+OSStatus CSound::EnableIO()
+{
+    OSStatus err = noErr;
+    UInt32 enableIO;
+    
+    ///////////////
+    //ENABLE IO (INPUT)
+    //You must enable the Audio Unit (AUHAL) for input and disable output
+    //BEFORE setting the AUHAL's current device.
+    
+    //Enable input on the AUHAL
+    enableIO = 1;
+    err =  AudioUnitSetProperty(mInputUnit,
+                                kAudioOutputUnitProperty_EnableIO,
+                                kAudioUnitScope_Input,
+                                1, // input element
+                                &enableIO,
+                                sizeof(enableIO));
+    checkErr(err);
+    
+    //disable Output on the AUHAL
+    enableIO = 0;
+    err = AudioUnitSetProperty(mInputUnit,
+                              kAudioOutputUnitProperty_EnableIO,
+                              kAudioUnitScope_Output,
+                              0,   //output element
+                              &enableIO,
+                              sizeof(enableIO));
+    return err;
+}
+OSStatus CSound::CallbackSetup()
+{
+    OSStatus err = noErr;
+    AURenderCallbackStruct input;
+    
+    input.inputProc = InputProc;
+    input.inputProcRefCon = this;
+    
+    //Setup the input callback.
+    err = AudioUnitSetProperty(mInputUnit,
+                              kAudioOutputUnitProperty_SetInputCallback,
+                              kAudioUnitScope_Global,
+                              0,
+                              &input,
+                              sizeof(input));
+    checkErr(err);
+    return err;
+}
+
+OSStatus CSound::SetInputDeviceAsCurrent(AudioDeviceID in)
+{
+    UInt32 size = sizeof(AudioDeviceID);
+    OSStatus err = noErr;
+    
+    AudioObjectPropertyAddress theAddress = { kAudioHardwarePropertyDefaultInputDevice,
+                                              kAudioObjectPropertyScopeGlobal,
+                                              kAudioObjectPropertyElementMaster };
+    
+    if(in == kAudioDeviceUnknown) //get the default input device if device is unknown
+    {
+        err = AudioObjectGetPropertyData(kAudioObjectSystemObject, &theAddress, 0, NULL, &size, &in);
+        checkErr(err);
+    }
+    mInputDevice.Init(in, true);
+    
+    //Set the Current Device to the AUHAL.
+    //this should be done only after IO has been enabled on the AUHAL.
+    err = AudioUnitSetProperty(mInputUnit,
+                              kAudioOutputUnitProperty_CurrentDevice,
+                              kAudioUnitScope_Global,
+                              0,
+                              &mInputDevice.mID,
+                              sizeof(mInputDevice.mID));
+    checkErr(err);
+    return err;
+}
+
+OSStatus CSound::SetupGraph(AudioDeviceID out)
+{
+    OSStatus err = noErr;
+    AURenderCallbackStruct output;
+    
+    //Make a New Graph
+    err = NewAUGraph(&mGraph);
+    checkErr(err);
+
+    //Open the Graph, AudioUnits are opened but not initialized
+    err = AUGraphOpen(mGraph);
+    checkErr(err);
+    
+    err = MakeGraph();
+    checkErr(err);
+        
+    err = SetOutputDeviceAsCurrent(out);
+    checkErr(err);
+    
+    //Tell the output unit not to reset timestamps
+    //Otherwise sample rate changes will cause sync los
+    UInt32 startAtZero = 0;
+    err = AudioUnitSetProperty(mOutputUnit,
+                              kAudioOutputUnitProperty_StartTimestampsAtZero,
+                              kAudioUnitScope_Global,
+                              0,
+                              &startAtZero,
+                              sizeof(startAtZero));
+    checkErr(err);
+    
+    output.inputProc = OutputProc;
+    output.inputProcRefCon = this;
+    
+    err = AudioUnitSetProperty(mVarispeedUnit,
+                              kAudioUnitProperty_SetRenderCallback,
+                              kAudioUnitScope_Input,
+                              0,
+                              &output,
+                              sizeof(output));
+    checkErr(err);
+    
+    return err;
+}
+
 
 void CSound::Stop()
 {
-    // stop the audio stream
-    AudioDeviceStop ( audioInputDevice[lCurDev], audioInputProcID );
-    AudioDeviceStop ( audioOutputDevice[lCurDev], audioOutputProcID );
-
-    // unregister the callback function for input and output
-    AudioDeviceDestroyIOProcID ( audioInputDevice[lCurDev], audioInputProcID );
-    AudioDeviceDestroyIOProcID ( audioOutputDevice[lCurDev], audioOutputProcID );
-
+    OSStatus err = noErr;
+    if(IsRunning()) {
+        
+        //Stop the AUHAL
+        err = AudioOutputUnitStop(mInputUnit);
+        verify_noerr(err);
+        
+        err = AUGraphStop(mGraph);
+        verify_noerr(err);
+        mFirstInputTime = -1;
+        mFirstOutputTime = -1;
+        bRun = false;
+        
+        if(mInputBuffer) {
+            for(UInt32 i = 0; i<mInputBuffer->mNumberBuffers; i++)
+                free(mInputBuffer->mBuffers[i].mData);
+            free(mInputBuffer);
+            mInputBuffer = 0;
+        }
+        
+        AudioUnitUninitialize(mInputUnit);
+        AUGraphClose(mGraph);
+        DisposeAUGraph(mGraph);
+        AudioComponentInstanceDispose(mInputUnit);
+        
+    
+    
+//    // stop the audio stream
+//    AudioDeviceStop ( audioInputDevice[lCurDev], audioInputProcID );
+//    AudioDeviceStop ( audioOutputDevice[lCurDev], audioOutputProcID );
+//
+//    // unregister the callback function for input and output
+//    AudioDeviceDestroyIOProcID ( audioInputDevice[lCurDev], audioInputProcID );
+//    AudioDeviceDestroyIOProcID ( audioOutputDevice[lCurDev], audioOutputProcID );
+//
     AudioObjectPropertyAddress stPropertyAddress;
 
     stPropertyAddress.mElement  = kAudioObjectPropertyElementMaster;
@@ -672,9 +901,41 @@ void CSound::Stop()
                                        deviceNotification,
                                        this );
 
-    // call base class
-    CSoundBase::Stop();
+        // call base class
+        CSoundBase::Stop();
+    }
 }
+
+
+
+
+
+bool CSound::IsCARunning()
+{
+    OSStatus err = noErr;
+    UInt32 auhalRunning = 0, size = 0;
+    Boolean graphRunning = false;
+    size = sizeof(auhalRunning);
+    if(mInputUnit)
+    {
+        err = AudioUnitGetProperty(mInputUnit,
+                                kAudioOutputUnitProperty_IsRunning,
+                                kAudioUnitScope_Global,
+                                0, // input element
+                                &auhalRunning,
+                                &size);
+        checkErr(err);
+    }
+    
+    if(mGraph) {
+        err = AUGraphIsRunning(mGraph,&graphRunning);
+        checkErr(err);
+    }
+    
+    bRun = (auhalRunning || graphRunning);
+    return CSoundBase::IsRunning();
+}
+
 
 int CSound::Init ( const int iNewPrefMonoBufferSize )
 {
@@ -792,6 +1053,105 @@ OSStatus CSound::deviceNotification ( AudioDeviceID,
     return noErr;
 }
 
+OSStatus CSound::InputProc(void *inRefCon,
+                           AudioUnitRenderActionFlags *ioActionFlags,
+                           const AudioTimeStamp *inTimeStamp,
+                           UInt32 inBusNumber,
+                           UInt32 inNumberFrames,
+                           AudioBufferList * ioData)
+{
+    OSStatus err = noErr;
+    
+    CSound *This = (CSound *)inRefCon;
+    if (This->mFirstInputTime < 0.)
+        This->mFirstInputTime = inTimeStamp->mSampleTime;
+        
+    //Get the new audio data
+    err = AudioUnitRender(This->mInputUnit,
+                         ioActionFlags,
+                         inTimeStamp,
+                         inBusNumber,
+                         inNumberFrames, //# of frames requested
+                         This->mInputBuffer);// Audio Buffer List to hold data
+    checkErr(err);
+        
+    if(!err) {
+        callbackIO(This->audioInputDevice[This->lCurDev], inTimeStamp, ioData, inTimeStamp, nil, nil, inRefCon);
+    }
+
+    return err;
+}
+
+inline void MakeBufferSilent (AudioBufferList * ioData)
+{
+    for(UInt32 i=0; i<ioData->mNumberBuffers;i++)
+        memset(ioData->mBuffers[i].mData, 0, ioData->mBuffers[i].mDataByteSize);
+}
+
+void CSound::ComputeThruOffset()
+{
+    //The initial latency will at least be the saftey offset's of the devices + the buffer sizes
+    mInToOutSampleOffset = SInt32(mInputDevice.mSafetyOffset +  mInputDevice.mBufferSizeFrames +
+                        mOutputDevice.mSafetyOffset + mOutputDevice.mBufferSizeFrames);
+}
+
+OSStatus CSound::OutputProc(void *inRefCon,
+                            AudioUnitRenderActionFlags *ioActionFlags,
+                            const AudioTimeStamp *TimeStamp,
+                            UInt32 inBusNumber,
+                            UInt32 inNumberFrames,
+                            AudioBufferList * ioData)
+{
+    OSStatus err = noErr;
+    CSound *This = (CSound *)inRefCon;
+    Float64 rate = 0.0;
+    AudioTimeStamp inTS, outTS;
+        
+    if (This->mFirstInputTime < 0.) {
+        // input hasn't run yet -> silence
+        MakeBufferSilent (ioData);
+        return noErr;
+    }
+    
+    //use the varispeed playback rate to offset small discrepancies in sample rate
+    //first find the rate scalars of the input and output devices
+    err = AudioDeviceGetCurrentTime(This->mInputDevice.mID, &inTS);
+    // this callback may still be called a few times after the device has been stopped
+    if (err)
+    {
+        MakeBufferSilent (ioData);
+        return noErr;
+    }
+        
+    err = AudioDeviceGetCurrentTime(This->mOutputDevice.mID, &outTS);
+    checkErr(err);
+    
+    rate = inTS.mRateScalar / outTS.mRateScalar;
+    err = AudioUnitSetParameter(This->mVarispeedUnit,kVarispeedParam_PlaybackRate,kAudioUnitScope_Global,0, rate,0);
+    checkErr(err);
+    
+    //get Delta between the devices and add it to the offset
+    if (This->mFirstOutputTime < 0.) {
+        This->mFirstOutputTime = TimeStamp->mSampleTime;
+        Float64 delta = (This->mFirstInputTime - This->mFirstOutputTime);
+        This->ComputeThruOffset();
+
+        if (delta < 0.0)
+            This->mInToOutSampleOffset -= delta;
+        else
+            This->mInToOutSampleOffset = -delta + This->mInToOutSampleOffset;
+                    
+        MakeBufferSilent (ioData);
+        return noErr;
+    }
+
+    if (!err) {
+    //copy the data from the buffers
+        return CSound::callbackIO(This->CurrentAudioOutputDeviceID, nil, nil, TimeStamp, ioData, TimeStamp, inRefCon);
+    }
+    return err;
+}
+
 OSStatus CSound::callbackIO ( AudioDeviceID          inDevice,
                               const AudioTimeStamp*,
                               const AudioBufferList* inInputData,
@@ -816,7 +1176,7 @@ OSStatus CSound::callbackIO ( AudioDeviceID          inDevice,
     if ( inDevice == pSound->CurrentAudioInputDeviceID )
     {
         // check size (float32 has four bytes)
-        if ( inInputData->mBuffers[0].mDataByteSize ==
+        if ( inInputData && inInputData->mBuffers[0].mDataByteSize ==
              static_cast<UInt32> ( iCoreAudioBufferSizeMono * iNumInChan * 4 ) )
         {
             // one buffer with all the channels in interleaved format:
@@ -850,7 +1210,7 @@ if ( iNumInChan == 4 )
 
             }
         }
-        else if ( inInputData->mNumberBuffers == (UInt32) iNumInChan && // we should have a matching number of buffers to channels
+        else if ( inInputData && inInputData->mNumberBuffers == (UInt32) iNumInChan && // we should have a matching number of buffers to channels
                   inInputData->mBuffers[0].mDataByteSize == static_cast<UInt32> ( iCoreAudioBufferSizeMono * 4 ) )
         {
             // one buffer per channel mode:
@@ -882,7 +1242,7 @@ if ( iNumInChan == 4 )
     if ( inDevice == pSound->CurrentAudioOutputDeviceID )
     {
         // check size (float32 has four bytes)
-        if ( outOutputData->mBuffers[0].mDataByteSize ==
+        if ( outOutputData && outOutputData->mBuffers[0].mDataByteSize ==
              static_cast<UInt32> ( iCoreAudioBufferSizeMono * iNumOutChan * 4 ) )
         {
             // one buffer with all the channels in interleaved format:
@@ -901,7 +1261,7 @@ if ( iNumInChan == 4 )
                     (Float32) pSound->vecsTmpAudioSndCrdStereo[2 * i + 1] / _MAXSHORT;
             }
         }
-        else if ( outOutputData->mNumberBuffers == (UInt32) iNumOutChan && // we should have a matching number of buffers to channels
+        else if ( outOutputData && outOutputData->mNumberBuffers == (UInt32) iNumOutChan && // we should have a matching number of buffers to channels
                   outOutputData->mBuffers[0].mDataByteSize == static_cast<UInt32> ( iCoreAudioBufferSizeMono * 4 ) )
         {
             // Outputs are to individual buffers too, rather than using channels
@@ -978,4 +1338,75 @@ bool CSound::ConvertCFStringToQString ( const CFStringRef stringRef,
     }
 
     return false; // not OK
+}
+
+OSStatus CSound::SetOutputDeviceAsCurrent(AudioDeviceID out)
+{
+    UInt32 size = sizeof(AudioDeviceID);;
+    OSStatus err = noErr;
+    
+//        UInt32 propsize = sizeof(Float32);
+    
+    //AudioObjectPropertyScope theScope = mIsInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+    
+    AudioObjectPropertyAddress theAddress = { kAudioHardwarePropertyDefaultOutputDevice,
+                                              kAudioObjectPropertyScopeGlobal,
+                                              kAudioObjectPropertyElementMaster };
+    
+    if(out == kAudioDeviceUnknown) //Retrieve the default output device
+    {
+        err = AudioObjectGetPropertyData(kAudioObjectSystemObject, &theAddress, 0, NULL, &size, &out);
+        checkErr(err);
+    }
+    mOutputDevice.Init(out, false);
+    
+    //Set the Current Device to the Default Output Unit.
+    err = AudioUnitSetProperty(mOutputUnit,
+                              kAudioOutputUnitProperty_CurrentDevice,
+                              kAudioUnitScope_Global,
+                              0,
+                              &mOutputDevice.mID,
+                              sizeof(mOutputDevice.mID));
+                            
+    return err;
+}
+
+OSStatus CSound::MakeGraph()
+{
+    OSStatus err = noErr;
+    AudioComponentDescription varispeedDesc,outDesc;
+    
+    //Q:Why do we need a varispeed unit?
+    //A:If the input device and the output device are running at different sample rates
+    //we will need to move the data coming to the graph slower/faster to avoid a pitch change.
+    varispeedDesc.componentType = kAudioUnitType_FormatConverter;
+    varispeedDesc.componentSubType = kAudioUnitSubType_Varispeed;
+    varispeedDesc.componentManufacturer = kAudioUnitManufacturer_Apple;
+    varispeedDesc.componentFlags = 0;
+    varispeedDesc.componentFlagsMask = 0;
+  
+    outDesc.componentType = kAudioUnitType_Output;
+    outDesc.componentSubType = kAudioUnitSubType_DefaultOutput;
+    outDesc.componentManufacturer = kAudioUnitManufacturer_Apple;
+    outDesc.componentFlags = 0;
+    outDesc.componentFlagsMask = 0;
+    
+    //////////////////////////
+    ///MAKE NODES
+    //This creates a node in the graph that is an AudioUnit, using
+    //the supplied ComponentDescription to find and open that unit
+    err = AUGraphAddNode(mGraph, &varispeedDesc, &mVarispeedNode);
+    checkErr(err);
+    err = AUGraphAddNode(mGraph, &outDesc, &mOutputNode);
+    checkErr(err);
+    
+    //Get Audio Units from AUGraph node
+    err = AUGraphNodeInfo(mGraph, mVarispeedNode, NULL, &mVarispeedUnit);
+    checkErr(err);
+    err = AUGraphNodeInfo(mGraph, mOutputNode, NULL, &mOutputUnit);
+    checkErr(err);
+    
+    // don't connect nodes until the varispeed unit has input and output formats set
+
+    return err;
 }
