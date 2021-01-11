@@ -1,8 +1,6 @@
 name:                         Publish Release
 on:
   push:
-    tags:
-      - "r*"
   workflow_dispatch:
 jobs:
   create_release:
