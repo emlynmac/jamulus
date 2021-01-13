@@ -3,6 +3,7 @@ on:
   push:
     tags:
       - "r*"
+      - "beta*"
   workflow_dispatch:
 jobs:
   create_release:
