@@ -1,9 +1,7 @@
 name:                               Publish Release
 on:
   push:
-    tags:
-      - "r*"
-      - "beta*"
+    tags: ["r*", "beta*"]
   workflow_dispatch:
 jobs:
   create_release:
