@@ -1,6 +1,6 @@
 on:
   push:
-    tags: ["r*", "beta*"]
+    tags:                           ["r*", "beta*"]
   workflow_dispatch:
 name:                               Publish Release
 
@@ -13,42 +13,42 @@ jobs:
       upload_url:                   ${{ steps.create_release.outputs.upload_url }}
       build_info:                   ${{ steps.jamulus-build-vars.outputs }}
      steps:
-         - name:                    Checkout code
-           uses:                    actions/checkout@v2
-         - name:                    Get Jamulus build info
-           run:                     sh ${{ github.workspace }}/.github/actions_scripts/get_release_vars.sh ${{ github.workspace }}
-           id:                      jamulus-build-vars
-         - name:                    Remove latest tag
-           if:                      ! contains('beta', ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }})
-           uses:                    dev-drprasad/delete-tag-and-release@v0.1.2
-           with:
-             delete_release:        false
-             tag_name:              latest # tag name to delete
-           env:
-             GITHUB_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
-         - name:                    Prepare latest release
-           if:                      ! contains('beta', ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }})
-           id:                      create_latest_release
-           uses:                    actions/create-release@v1
-           env:
-             GITHUB_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
-           with:
-             tag_name:              latest
-             release_name:          Latest release ${{ steps.jamulus-build-vars.outputs.JAMULUS_VERSION }} (auto build)
-             body_path:             ${{ github.workspace }}/autoLatestChangelog.md
-             draft:                 false
-             prerelease:            contains('beta', ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }}) # set the prerelease tag if the tag contians beta
-         - name:                    Prepare latest release
-           id:                      create_release
-           uses:                    actions/create-release@v1
-           env:
-             GITHUB_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
-           with:
-             tag_name:              ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }}
-             release_name:          Release ${{ steps.jamulus-build-vars.outputs.JAMULUS_VERSION }} (auto build)
-             body_path:             ${{ github.workspace }}/autoLatestChangelog.md
-             draft:                 false
-             prerelease:            false
+       - name:                      Checkout code
+         uses:                      actions/checkout@v2
+       - name:                      Get Jamulus build info
+         run:                       sh ${{ github.workspace }}/.github/actions_scripts/get_release_vars.sh ${{ github.workspace }}
+         id:                        jamulus-build-vars
+       - name:                      Remove latest tag
+         if:                        ! contains('beta', ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }})
+         uses:                      dev-drprasad/delete-tag-and-release@v0.1.2
+         with:
+           delete_release:          false
+           tag_name:                latest # tag name to delete
+         env:
+           GITHUB_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
+       - name:                      Prepare latest release
+         if:                        ! contains('beta', ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }})
+         id:                        create_latest_release
+         uses:                      actions/create-release@v1
+         env:
+           GITHUB_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
+         with:
+           tag_name:                latest
+           release_name:            Latest release ${{ steps.jamulus-build-vars.outputs.JAMULUS_VERSION }} (auto build)
+           body_path:               ${{ github.workspace }}/autoLatestChangelog.md
+           draft:                   false
+           prerelease:              contains('beta', ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }}) # set the prerelease tag if the tag contians beta
+       - name:                      Prepare latest release
+         id:                        create_release
+         uses:                      actions/create-release@v1
+         env:
+           GITHUB_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
+         with:
+           tag_name:                ${{ steps.jamulus-build-vars.outputs.PUSH_TAG }}
+           release_name:            Release ${{ steps.jamulus-build-vars.outputs.JAMULUS_VERSION }} (auto build)
+           body_path:               ${{ github.workspace }}/autoLatestChangelog.md
+           draft:                   false
+           prerelease:              false
   release_assets:
     name:                           Release assets
     needs:                          create_release
@@ -103,7 +103,7 @@ jobs:
         env:
           GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }} # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url:               ${{ needs.create_release.outputs.upload_url }} # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           asset_path:               ${{ matrix.config.asset_path }}
           asset_name:               ${{ matrix.config.asset_name }}
           asset_content_type:       application/octet-stream
