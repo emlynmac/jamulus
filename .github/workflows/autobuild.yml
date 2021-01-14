@@ -1,7 +1,5 @@
 on:
   push:
-    tags:
-      - "r*"
   workflow_dispatch:
 name:                               Publish Release
 jobs:
