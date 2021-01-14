@@ -28,5 +28,5 @@ cp ${1}/../*.deb ${1}/deploy/
 
 # rename them
 
-mv ${1}/deploy/jamulus-headless*_amd64.deb deploy/Jamulus_headless_amd64.deb
-mv ${1}/deploy/jamulus*_amd64.deb deploy/Jamulus_amd64.deb
+mv ${1}/deploy/jamulus-headless*_amd64.deb ${1}/deploy/Jamulus_headless_amd64.deb
+mv ${1}/deploy/jamulus*_amd64.deb ${1}/deploy/Jamulus_amd64.deb

@@ -6,6 +6,8 @@ if [ -z "${1}"]; then
     exit 1
 fi
 
+cd ${1}
+
 echo "Install dependencies..."
 brew install qt5
 brew link qt5 --force
