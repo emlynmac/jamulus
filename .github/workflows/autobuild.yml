@@ -58,9 +58,9 @@ jobs:
              asset_path:            deploy/Jamulus_latest_amd64.deb
              asset_name:            jamulus_${{ needs.create_release.outputs.version }}_ubuntu_amd64.deb
              asset_latest_name:     jamulus_latest_ubuntu_amd64.deb
-             asset_path_two:        deploy/Jamulus_headless_latest_amd64.deb
+             asset_path_two:        deploy/Jamulus_headless_amd64.deb
              asset_name_two:        jamulus_headless_${{ needs.create_release.outputs.version }}_ubuntu_amd64.deb
-             asset_latest_name_two: jamulus_headless_latest_ubuntu_amd64.deb
+             asset_latest_name_two: jamulus_headless_ubuntu_amd64.deb
            - os:                    macos-10.15
              asset_path:            deploy/Jamulus-installer-mac.dmg
              asset_name:            jamulus_${{ needs.create_release.outputs.version }}_mac.dmg
@@ -88,13 +88,13 @@ jobs:
           dir:                      '${{ github.workspace }}'
           arch:                     'win32_msvc2019'
       - name:                       "Build deb (Linux)"
-        run:                        cd distributions; sudo ./build-debian-package-auto.sh
+        run:                        sh linux/autorelease_linux.sh ${{ github.workspace }}
         if:                         matrix.config.os == 'ubuntu-18.04'
       - name:                       "Build (Windows)"
         run:                        powershell .\windows\deploy_windows.ps1 ${{ github.workspace }}\Qt\5.15.2\; cp deploy\Jamulus*installer-win.exe deploy\Jamulus-installer-win.exe
         if:                         matrix.config.os == 'windows-latest'
       - name:                       "Build (macOS)"
-        run:                        brew install qt5; brew link qt5 --force; sh mac/deploy_mac.sh; cp deploy/Jamulus-*installer-mac.dmg deploy/Jamulus-installer-mac.dmg
+        run:                        sh mac/autorelease_mac.sh ${{ github.workspace }}
         if:                         matrix.config.os == 'macos-10.15'
       - name:                       Upload Release Asset 1
         id:                         upload-release-asset
