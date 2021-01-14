@@ -1,4 +1,5 @@
 ; Jamulus NSIS Installer with Modern User Interface
+; Licensed under the GPL
 
 ; Includes
 !include "x64.nsh"       ; 64bit architecture support
