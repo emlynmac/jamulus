@@ -55,7 +55,7 @@ jobs:
       matrix:
         config:
            - os:                    ubuntu-18.04
-             asset_path:            ${{ github.workspace }}/deploy/Jamulus_latest_amd64.deb
+             asset_path:            ${{ github.workspace }}/deploy/Jamulus_amd64.deb
              asset_name:            jamulus_${{ needs.create_release.outputs.version }}_ubuntu_amd64.deb
              asset_latest_name:     jamulus_latest_ubuntu_amd64.deb
              asset_path_two:        ${{ github.workspace }}/deploy/Jamulus_headless_amd64.deb
