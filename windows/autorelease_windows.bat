@@ -6,7 +6,7 @@ aqt install --outputdir C:\Qt 5.15.2 windows desktop win64_msvc2019_64
 aqt install --outputdir C:\Qt 5.15.2 windows desktop win32_msvc2019
 
 :: Build the installer
-powershell %1\windows\deploy_windows.ps1 C:\Qt\5.15.2
+powershell -file %1\windows\deploy_windows.ps1 C:\Qt\5.15.2
 
 :: Rename the installer
 cp %1\deploy\Jamulus*installer-win.exe %1\deploy\Jamulus-installer-win.exe
