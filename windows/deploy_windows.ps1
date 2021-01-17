@@ -1,6 +1,6 @@
 param(
     # Replace default path with system Qt installation folder if necessary
-    [string] $QtInstallPath = "C:\Qt\5.12.3",
+    [string] $QtInstallPath = "C:\Qt\5.12.2",
     [string] $QtCompile32 = "msvc2019",
     [string] $QtCompile64 = "msvc2019_64",
     [string] $AsioSDKName = "ASIOSDK2.3.2",
@@ -130,7 +130,7 @@ Function Install-Dependency
 # Install VSSetup (Visual Studio detection), ASIO SDK and NSIS Installer
 Function Install-Dependencies
 {
-    Load-Module -m "PackageManagement"
+    Install-Module PowershellGet -Force
     if (-not (Get-PackageProvider -Name nuget).Name -eq "nuget") {
       Install-PackageProvider -Name "Nuget" -Scope CurrentUser -Force
     }
