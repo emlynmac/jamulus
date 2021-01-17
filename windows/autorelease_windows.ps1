@@ -10,7 +10,7 @@ aqt install --outputdir C:\Qt 5.15.2 windows desktop win32_msvc2019
 
 echo "Build installer..."
 # Build the installer
-powershell $args[0]\windows\deploy_windows.ps1 C:\Qt\5.15.2
+powershell "$args[0]\windows\deploy_windows.ps1" "C:\Qt\5.15.2"
 
-:: Rename the installer
-cp $args[0]\deploy\Jamulus*installer-win.exe $args[0]\deploy\Jamulus-installer-win.exe
+# Rename the installer
+cp "$args[0]\deploy\Jamulus*installer-win.exe" "$args[0]\deploy\Jamulus-installer-win.exe"
