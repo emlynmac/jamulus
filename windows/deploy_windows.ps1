@@ -1,20 +1,15 @@
 param(
     # Replace default path with system Qt installation folder if necessary
-    [string] $QtInstallPath = "C:\Qt\5.15.2",
+    [string] $QtInstallPath = "C:\Qt\5.12.3",
     [string] $QtCompile32 = "msvc2019",
     [string] $QtCompile64 = "msvc2019_64",
     [string] $AsioSDKName = "ASIOSDK2.3.2",
     [string] $AsioSDKUrl = "https://www.steinberg.net/sdk_downloads/ASIOSDK2.3.2.zip",
     [string] $NsisName = "nsis-3.06.1",
-    [string] $NsisUrl = "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.06.1/nsis-3.06.1.zip"
+    [string] $NsisUrl = "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.06.1/nsis-3.06.1.zip",
+    [string] $NSProcessName = "Plugin/nsProcessW.dll",
+    [string] $NSProcessUrl = "http://forums.winamp.com/attachment.php?attachmentid=54705&d=1610882327"
 )
-# for gh actions
-
-Remove-Item Env:\QML2_IMPORT_PATH
-Remove-Item Env:\QT_PLUGIN_PATH
-Remove-Item Env:\Qt5_Dir
-
-Set-Location -Path "$PSScriptRoot\..\"
 
 # change directory to the directory above (if needed)
 Set-Location -Path "$PSScriptRoot\..\"
@@ -119,7 +114,7 @@ Function Install-Dependency
     $TempFileName = [System.IO.Path]::GetTempFileName() + ".zip"
     $TempDir = [System.IO.Path]::GetTempPath()
 
-    if ($Uri -Match "sourceforge")
+    if ($Uri -Match "downloads.sourceforge.net")
     {
       $Uri = Get-RedirectedUrl -URL $Uri
     }
@@ -138,12 +133,13 @@ Function Install-Dependencies
     if (-not (Get-PackageProvider -Name nuget).Name -eq "nuget") {
       Install-PackageProvider -Name "Nuget" -Scope CurrentUser -Force
     }
-    # Install-Module PowershellGet -Force
     Load-Module -m "VSSetup"
     Install-Dependency -Uri $AsioSDKUrl `
         -Name $AsioSDKName -Destination "ASIOSDK2"
     Install-Dependency -Uri $NsisUrl `
         -Name $NsisName -Destination "NSIS"
+    Install-Dependency -Uri $NSProcessUrl `
+        -Name $NSProcessName -Destination "nsProcess.dll"
 }
 
 # Setup environment variables and build tool paths

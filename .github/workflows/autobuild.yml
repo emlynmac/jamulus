@@ -95,7 +95,7 @@ jobs:
         run:                        sh linux/autorelease_linux.sh ${{ github.workspace }}
         if:                         matrix.config.os == 'ubuntu-18.04'
       - name:                       "Build (Windows)"
-        run:                        .\windows\autorelease_windows.bat ${{ github.workspace }}
+        run:                        powershell .\windows\autorelease_windows.ps1 ${{ github.workspace }}
         if:                         matrix.config.os == 'windows-latest'
       - name:                       "Build (macOS)"
         run:                        sh mac/autorelease_mac.sh ${{ github.workspace }}
