@@ -1,5 +1,8 @@
 # Sets up the environment for autobuild on Windows
 
+# Get the source path via parameter
+param ([string] $sourcepath)
+
 echo "Install Qt..."
 # Install Qt
 pip install aqtinstall
@@ -10,7 +13,7 @@ aqt install --outputdir C:\Qt 5.15.2 windows desktop win32_msvc2019
 
 echo "Build installer..."
 # Build the installer
-powershell "$args[0]\windows\deploy_windows.ps1" "C:\Qt\5.15.2"
+powershell "$sourcepath\windows\deploy_windows.ps1" "C:\Qt\5.15.2"
 
 # Rename the installer
-cp "$args[0]\deploy\Jamulus*installer-win.exe" "$args[0]\deploy\Jamulus-installer-win.exe"
+cp "$sourcepath\deploy\Jamulus*installer-win.exe" "$sourcepath\deploy\Jamulus-installer-win.exe"
