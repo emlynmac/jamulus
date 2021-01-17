@@ -52,16 +52,16 @@ Function Clean-Build-Environment
 
 # For sourceforge links we need to get the correct mirror (especially NISIS) Thanks: https://www.powershellmagazine.com/2013/01/29/pstip-retrieve-a-redirected-url/
 Function Get-RedirectedUrl {
- 
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$URL
     )
- 
+
     $request = [System.Net.WebRequest]::Create($url)
     $request.AllowAutoRedirect=$false
     $response=$request.GetResponse()
- 
+
     if ($response.StatusCode -eq "Found")
     {
         $response.GetResponseHeader("Location")
@@ -130,6 +130,7 @@ Function Install-Dependency
 # Install VSSetup (Visual Studio detection), ASIO SDK and NSIS Installer
 Function Install-Dependencies
 {
+    Load-Module -m "PackageManagement"
     if (-not (Get-PackageProvider -Name nuget).Name -eq "nuget") {
       Install-PackageProvider -Name "Nuget" -Scope CurrentUser -Force
     }
