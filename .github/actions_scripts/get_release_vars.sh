@@ -3,7 +3,7 @@
 set -e 
 
 # get version from project-file
-JAMULUS_VERSION=$("grep -oP 'VERSION = \K\w[^\s\\]*' \"${1}/Jamulus.pro\"")
+JAMULUS_VERSION=$("cat \"${1}/Jamulus.pro\" | grep -oP 'VERSION = \K\w[^\s\\]*'")
 
 # get the tag/branch-name which pushed this
 PUSHED_NAME="${GITHUB_REF#refs/*/}"
