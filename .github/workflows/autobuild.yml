@@ -62,6 +62,7 @@ jobs:
     needs:                          create_release
     runs-on:                        ${{ matrix.config.building_on_os }}
     strategy:
+      fail-fast:                    false
       matrix: # Think of this like a foreach loop. Basically runs the steps with every combination of the contents of this. More info: https://docs.github.com/en/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
         config:
            - config_name:           Linux (normal)
