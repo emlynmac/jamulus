@@ -12,5 +12,5 @@ cd jamulus
 ####################################################
 
 #build & run docker
-docker build -t myjambuild ./distribute_android
+docker build -t myjambuild ./android/automated_build
 docker run --rm -v `pwd`:/jamulus -w /jamulus -e CONFIG=release myjambuild

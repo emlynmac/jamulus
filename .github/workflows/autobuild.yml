@@ -108,7 +108,7 @@ jobs:
         run:                        sh mac/autorelease_mac.sh ${{ github.workspace }}
         if:                         matrix.config.target_os == 'macos'
       - name:                       "Build (Android)"
-        uses:                       ./distribute_android/ # Uses an action in the directory
+        uses:                       ./android/automated_build/ # Uses an action in the directory
         if:                         matrix.config.target_os == 'android'
         
       # Upload release

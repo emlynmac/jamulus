@@ -74,9 +74,9 @@ RUN bash install-qt.sh --version $MY_QT_VERSION --target android --toolchain and
 ENV QTDIR="/opt/Qt/$MY_QT_VERSION/android"
 
 
-COPY build.sh /build.sh
-RUN chmod +x /build.sh
+COPY build_qt_project.sh /build_qt_project.sh
+RUN chmod +x /build_qt_project.sh
 
-ENTRYPOINT /bin/bash /build.sh
+ENTRYPOINT /bin/bash /build_qt_project.sh
 
 
