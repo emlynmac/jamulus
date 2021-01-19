@@ -156,5 +156,5 @@ jobs:
       with:
         upload_url:               ${{ needs.create_release.outputs.upload_url }} # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
         asset_path:               deploy/io.jamulus.Jamulus.flatpack
-        asset_name:               io.jamulus.Jamulus.flatpack
+        asset_name:               io.jamulus.Jamulus
         asset_content_type:       application/octet-stream
