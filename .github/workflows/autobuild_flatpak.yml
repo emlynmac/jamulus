@@ -1,8 +1,5 @@
-on:
-  push:
-    tags:
-      - "r*"
-  workflow_dispatch:
+on: push
+
 name: "Autobuild Flatpak"
 jobs:
   flatpak-builder:
