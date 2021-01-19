@@ -110,8 +110,8 @@ jobs:
 
       ### Build ###
 
-      - name:                       "Build for ${{ config_name }}"
-        run:                        ${{ build_command }}
+      - name:                       "Build for ${{ matrix.config.config_name }}"
+        run:                        ${{ matrix.config.build_command }}
 
       ### Upload releases ###
 
