@@ -17,3 +17,7 @@ jobs:
       with:
         bundle: "io.jamulus.Jamulus.flatpak"
         manifest-path: "distributions/io.jamulus.Jamulus.json"
+    - uses: actions/download-artifact@v2
+      with:
+        name: io.jamulus.Jamulus
+        path: deploy/
