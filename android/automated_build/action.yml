@@ -5,7 +5,7 @@ description: 'Run Android-Build-Docker'
 #    description: 'The time we greeted you'
 runs:
   using: 'docker'
-  image: ./android/automated_build/Dockerfile
+  image: ./Dockerfile
   args:
     - ${{ inputs.who-to-greet }}
     - CONFIG=release
