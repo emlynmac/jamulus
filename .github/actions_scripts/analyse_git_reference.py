@@ -11,9 +11,14 @@ jamulus_version=sys.argv[3]
 release_version_name = jamulus_version
 
 if fullref.startswith("refs/tags/"):
-    print('python is Tag')
-    is_prerelease=False
+    if "beta" in pushed_name:
+        print('this is a Beta-Release-Tag')
+        is_prerelease = True
+    else:
+        print('this is a Release-Tag')
+        is_prerelease = True
     if pushed_name == "latest":
+        print('this is a Latest-Tag')
         release_version_name = "latest"
         release_title='Release "latest"'
     else:
