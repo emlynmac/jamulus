@@ -115,7 +115,7 @@ jobs:
         run:                        ${{ matrix.config.build_command }} "${{ github.workspace }}"
         if:                         ${{ matrix.config.config_name }} != "AndroidAPK"
       - name:                       "Build for Android"
-        uses:                       ${{ github.workspace }}/android/automated_build/ # Uses an action in the directory
+        uses:                       android/automated_build/ # Uses an action in the directory
         if:                         ${{ matrix.config.config_name }} == "AndroidAPK"
       ### Upload releases ###
 
