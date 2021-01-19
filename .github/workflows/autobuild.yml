@@ -55,8 +55,18 @@ jobs:
          ### CANCEL ### can be used for development concerning release-creation
          #- name:                    Cancelthrougherroe
          #  run:                     myundefinedfunction
-
-
+  flatpak-builder:
+    name: "Flatpak Builder"
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/bilelmoussaoui/flatpak-github-actions
+      options: --privileged
+    steps:
+    - uses: actions/checkout@v2
+    - uses: bilelmoussaoui/flatpak-github-actions@v2
+      with:
+        bundle: "io.jamulus.Jamulus.flatpak"
+        manifest-path: "distributions/io.jamulus.Jamulus.json"
   release_assets:
     name:                           Release assets for ${{ matrix.config.config_name }}
     needs:                          create_release
