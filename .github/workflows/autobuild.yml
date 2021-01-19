@@ -115,7 +115,9 @@ jobs:
       - name:                       "Build for ${{ matrix.config.config_name }}"
         run:                        ${{ matrix.config.build_command }} "${{ github.workspace }}"
         if:                         ${{ matrix.config.build_command }}
-
+      - name:                       "Build for ${{ matrix.config.config_name }}"
+        uses:                       ${{ matrix.config.build_uses }}
+        if:                         ${{ matrix.config.build_uses }} != null
       ### Upload releases ###
 
       ## Upload assets to the release which is tagged with the tag that triggered this action.
