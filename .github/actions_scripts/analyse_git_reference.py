@@ -37,7 +37,7 @@ print("IS_PRERELEASE::{}".format(is_prerelease)) #debug output
 print("RELEASE_TITLE::{}".format(release_title)) #debug output
 print("::set-output name=IS_PRERELEASE::{}".format(str(is_prerelease).lower()))
 print("::set-output name=RELEASE_TITLE::{}".format(release_title))
-print("::set-output name=RELEASE_TAG::{}".format("releasetag/"+pushed_name))
+print("::set-output name=RELEASE_TAG::{}".format(pushed_name))
 print("::set-output name=PUSHED_NAME::{}".format(pushed_name))
 print("::set-output name=JAMULUS_VERSION::{}".format(jamulus_version))
 print("::set-output name=RELEASE_VERSION_NAME::{}".format(release_version_name))
