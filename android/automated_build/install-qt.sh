@@ -233,13 +233,13 @@ DOWNLOAD_DIR=`mktemp -d 2>/dev/null || mktemp -d -t 'install-qt'`
 function compute_url(){
     local COMPONENT=$1
     local CURL="curl -s -L"
-    local BASE_URL="http://download.qt.io/online/qtsdkrepository/${HOST_OS}/${TARGET_PLATFORM}"
+    local BASE_URL="https://mirrors.ocf.berkeley.edu/qt/online/qtsdkrepository/${HOST_OS}/${TARGET_PLATFORM}"
     local ANDROID_ARCH=$(echo ${TOOLCHAIN##android_})
 
     if [[ "${COMPONENT}" =~ "qtcreator" ]]; then
 
         SHORT_VERSION=${VERSION%??}
-        BASE_URL="http://download.qt.io/official_releases/qtcreator"
+        BASE_URL="https://mirrors.ocf.berkeley.edu/qt/official_releases/qtcreator"
         REMOTE_PATH="${SHORT_VERSION}/${VERSION}/installer_source/${HOST_OS}/qtcreator.7z"
         echo "${BASE_URL}/${REMOTE_PATH}"
         return 0
