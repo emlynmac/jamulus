@@ -9,7 +9,7 @@ on:
 #      - "*"
 #      - master         # could be restricted to master, if all branches take too much build time
 name:                               Publish Release
-jobs: 
+jobs:
   create_release:
      name:                          Create release
      runs-on:                       ubuntu-latest
@@ -22,13 +22,13 @@ jobs:
          # Checkout code
          - name:                    Checkout code
            uses:                    actions/checkout@v2
-         
-         # Set variables 
+
+         # Set variables
          # Determine releas / pre-release
          - name:                    Get Jamulus build info
            run:                     sh ${{ github.workspace }}/.github/actions_scripts/get_release_vars.sh ${{ github.workspace }}
            id:                      jamulus-build-vars
-           
+
          # remove tag "latest" from that release
          - name:                    Remove release, if existing (for latest and branches)
            continue-on-error:       true
@@ -50,13 +50,13 @@ jobs:
              body_path:             ${{ github.workspace }}/autoLatestChangelog.md
              prerelease:            ${{ steps.jamulus-build-vars.outputs.IS_PRERELEASE }}
              draft:                 false
-                      
-           
+
+
          ### CANCEL ### can be used for development concerning release-creation
          #- name:                    Cancelthrougherroe
          #  run:                     myundefinedfunction
-             
-             
+
+
   release_assets:
     name:                           Release assets for ${{ matrix.config.config_name }}
     needs:                          create_release
@@ -97,7 +97,7 @@ jobs:
         uses:                       actions/checkout@v2
         with:
           submodules:               true
-        
+
       # Build
       - name:                       "Build deb (Linux)"
         run:                        sh linux/autorelease_linux.sh ${{ github.workspace }}
@@ -111,7 +111,7 @@ jobs:
       - name:                       "Build (Android)"
         uses:                       ./android/automated_build/ # Uses an action in the directory
         if:                         matrix.config.target_os == 'android'
-        
+
       # Upload release
       - name:                       Upload Release Asset - Tag
         id:                         upload-release-asset
@@ -123,4 +123,3 @@ jobs:
           asset_path:               ${{ matrix.config.asset_path }}
           asset_name:               ${{ matrix.config.asset_name }}
           asset_content_type:       application/octet-stream
-
