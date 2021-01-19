@@ -39,7 +39,7 @@ jobs:
            env:
              GITHUB_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
          # create release (empty, filled by next job)
-         - name:                    'Create Release ${{steps.jamulus-build-vars.outputs.RELEASE_TAG}}  {{steps.jamulus-build-vars.outputs.RELEASE_TITLE}}'
+         - name:                    'Create Release ${{ steps.jamulus-build-vars.outputs.RELEASE_TAG }}  {{ steps.jamulus-build-vars.outputs.RELEASE_TITLE }}'
            id:                      create_release_step
            uses:                    actions/create-release@v1
            env:
