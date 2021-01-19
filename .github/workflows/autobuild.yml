@@ -115,7 +115,7 @@ jobs:
         run:                        ${{ matrix.config.build_command }} "${{ github.workspace }}"
         if:                         ${{ matrix.config.build_command }}
       - name:                       "Build for ${{ matrix.config.config_name }}"
-        uses:                       android/automated_build/ # Uses an action in the directory
+        uses:                       ./android/automated_build/ # Uses an action in the directory
         if:                         ${{ matrix.config.target_os }} == "android"
       ### Upload releases ###
 
