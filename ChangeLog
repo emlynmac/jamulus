@@ -4,6 +4,8 @@
 
 ### 3.6.2dev <- NOTE: the release version number will be 3.7.0 ###
 
+- Add new release process
+
 - introduced new server lists: Any Genre 2, Choral/Barbershop (#875)
 
 - show --clientname as first word in title to avoid clipping in Windows task bar (#789)
