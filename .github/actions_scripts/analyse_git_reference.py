@@ -79,6 +79,8 @@ if fullref.startswith("refs/tags/"):
         publish_to_release = True
         release_version_name = "latest"
         release_title='Release "latest"'
+        is_prerelease = False
+
 elif fullref.startswith("refs/heads/"):
     print('this reference is a Head/Branch')
     publish_to_release = False
