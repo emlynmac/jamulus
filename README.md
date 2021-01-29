@@ -1,8 +1,8 @@
-![Homepage picture](src/res/homepage/jamulusbannersmall.png)
+[![Homepage picture](src/res/homepage/jamulusbannersmall.png)](https://jamulus.io)
 
 Jamulus (eduTools fork) - Internet Jam Session Software
 =======================================
-<img align="left" src="src/res/homepage/mediawikisidebarlogo.png"/>
+<a href="https://jamulus.io/"><img align="left" src="src/res/homepage/mediawikisidebarlogo.png"/></a>
 
 This is a fork with some extra features I need (waiting room, ...) and not an official version of Jamulus! Please use the official version from corrados: https://github.com/corrados/jamulus if you don't need my changes!
 
@@ -11,21 +11,21 @@ There is one server running the Jamulus server software which collects the audio
 each Jamulus client, mixes the audio data and sends the mix back to each client.
 
 Jamulus is __Open Source software__ ([GPL, GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html))
-and runs under __Windows__ ([ASIO](http://www.steinberg.net)),
+and runs under __Windows__ ([ASIO](https://www.steinberg.net)),
 __MacOS__ ([Core Audio](https://developer.apple.com/documentation/coreaudio)) and
-__Linux__ ([Jack](http://jackaudio.org)).
+__Linux__ ([Jack](https://jackaudio.org)).
 It is based on the [Qt framework](https://www.qt.io) and uses the [OPUS](http://www.opus-codec.org) audio codec.
 
-![Sourceforge logo](http://sflogo.sourceforge.net/sflogo.php?group_id=158367&amp;type=5)
+[![Sourceforge logo](https://sflogo.sourceforge.net/sflogo.php?group_id=158367&amp;type=5)](https://sourceforge.net/projects/llcon)
 
-The project is hosted at [Sourceforge.net](http://sourceforge.net/projects/llcon).
+The project is hosted at [Sourceforge.net](https://sourceforge.net/projects/llcon).
 
 
 
-Installation and Getting Started
---------------------------------
+Installation
+------------
 
-[Please see this overview](https://jamulus.io/wiki/Getting-Started) containing instructions for installing and using Jamulus for your platform.
+[Please see the Getting Started page](https://jamulus.io/wiki/Getting-Started) containing instructions for installing and using Jamulus for your platform.
 
 
 Help
