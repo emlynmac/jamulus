@@ -62,8 +62,7 @@ void CServerLogging::AddNewConnection ( const QHostAddress& ClientInetAddr,
     const QString strLogStr = CurTimeDatetoLogString() + ", " +
         strClientIP + ", connected (" + QString::number ( iNumberOfConnectedClients ) + ")";
 
-    QTextStream& tsConsoleStream = *( ( new ConsoleWriterFactory() )->get() );
-    tsConsoleStream << strLogStr << endl; // on console
+    qInfo() << qUtf8Printable( strLogStr ); // on console
     *this << strLogStr; // in log file
 }
 
@@ -72,8 +71,7 @@ void CServerLogging::AddServerStopped()
     const QString strLogStr = CurTimeDatetoLogString() + ",, server idling "
         "-------------------------------------";
 
-    QTextStream& tsConsoleStream = *( ( new ConsoleWriterFactory() )->get() );
-    tsConsoleStream << strLogStr << endl; // on console
+    qInfo() << qUtf8Printable( strLogStr ); // on console
     *this << strLogStr; // in log file
 }
 
