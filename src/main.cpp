@@ -149,7 +149,7 @@ int main ( int argc, char** argv )
                                "--logip" ) )
         {
             bLogIP = true;
-            tsConsole << "- Logging full IP adresses." << endl;
+            qInfo() << qUtf8Printable( QString( "- Logging full IP adresses." ) );
             CommandLineOptions << "--logip";
             continue;
         }
@@ -445,8 +445,7 @@ int main ( int argc, char** argv )
         }
 
         // Education mode password ---------------------------------------------
-        if ( GetStringArgument ( tsConsole,
-                                 argc,
+        if ( GetStringArgument ( argc,
                                  argv,
                                  i,
                                  "--edumodepassword", // no short argument
@@ -455,7 +454,7 @@ int main ( int argc, char** argv )
         {
             strEduModePassword = strArgument;
             bEduModeEnabled    = true;
-            tsConsole << "- enabld Edu-Mode with password " << endl;
+            qInfo() << qUtf8Printable( QString( "- enabled Edu-Mode with password " ) );
             CommandLineOptions << "--edumodepassword";
             continue;
         }
