@@ -20,7 +20,7 @@ python3 -m aqt install --outputdir /usr/local/opt/qt 5.12.12 mac desktop
 # add the qt binaries to the path
 # debug output
 echo $PATH
-export PATH=/usr/local/opt/qt/bin:"${PATH}"
+export PATH=/usr/local/opt/qt/5.12.12/bin:"${PATH}"
 echo $PATH
 echo "Run deploy script..."
 sh "${1}"/mac/deploy_mac.sh
