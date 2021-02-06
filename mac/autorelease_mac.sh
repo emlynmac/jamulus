@@ -16,11 +16,11 @@ echo "Install dependencies..."
 #brew link qt5 --force
 python3 -m pip install aqtinstall
 
-python3 -m aqt install --outputdir /usr/local/opt/qt 5.12.0 mac desktop
+python3 -m aqt install --outputdir /usr/local/opt/qt 5.12.12 mac desktop
 # add the qt binaries to the path
 # debug output
 echo $PATH
-export PATH=/usr/local/opt/qt:"${PATH}"
+export PATH=/usr/local/opt/qt/bin:"${PATH}"
 echo $PATH
 echo "Run deploy script..."
 sh "${1}"/mac/deploy_mac.sh
