@@ -18,7 +18,10 @@ python3 -m pip install aqtinstall
 
 python3 -m aqt install --outputdir "${GITHUB_WORKSPACE}"/qt/ 5.12.0 mac desktop
 # add the qt binaries to the path
+# debug output
+echo $PATH
 export PATH="${GITHUB_WORKSPACE}"/qt/:"${PATH}"
+echo $PATH
 echo "Run deploy script..."
 sh "${1}"/mac/deploy_mac.sh
 
