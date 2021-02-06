@@ -18,12 +18,8 @@ python3 -m pip install aqtinstall
 
 python3 -m aqt install --outputdir /usr/local/opt/qt 5.12.9 mac desktop
 # add the qt binaries to the path
-# debug output
 
 export PATH=/usr/local/opt/qt/5.12.9/clang_64/bin:"${PATH}"
-echo "---"
-ls /usr/local/opt/qt/5.12.9/clang_64/
-echo "---"
 
 sh "${1}"/mac/deploy_mac.sh
 
