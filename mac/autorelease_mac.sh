@@ -1,3 +1,4 @@
+
 #!/bin/sh -e
 
 # Sets up the environment for autobuild on macOS
@@ -11,9 +12,13 @@ fi
 cd "${1}"
 
 echo "Install dependencies..."
-brew install qt5
-brew link qt5 --force
+#brew install qt5
+#brew link qt5 --force
+python3 -m pip install aqtinstall
 
+python3 -m aqt install --outputdir "${GITHUB_WORKSPACE}"/qt/ 5.12.0 mac desktop
+# add the qt binaries to the path
+export PATH="${GITHUB_WORKSPACE}"/qt/:"${PATH}"
 echo "Run deploy script..."
 sh "${1}"/mac/deploy_mac.sh
 
