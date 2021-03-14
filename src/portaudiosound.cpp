@@ -342,7 +342,12 @@ QString CSound::LoadAndInitializeDriver ( QString strDriverName, bool bOpenDrive
     {
         return tr ( "The current selected audio device is no longer present in the system." );
     }
-    return ReinitializeDriver ( inIndex, outIndex );
+    QString err = ReinitializeDriver ( inIndex, outIndex );
+    if ( err.isEmpty() )
+    {
+        strCurDevName = strDriverName;
+    }
+    return err;
 }
 
 QString CSound::ReinitializeDriver ( PaDeviceIndex inIndex, PaDeviceIndex outIndex )

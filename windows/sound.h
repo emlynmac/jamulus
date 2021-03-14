@@ -61,6 +61,7 @@ public:
     virtual void Stop();
 
     virtual void OpenDriverSetup() { ASIOControlPanel(); }
+    virtual bool HasControlPanel() { return true; } // always using ASIO
 
     // channel selection
     virtual int     GetNumInputChannels() { return static_cast<int> ( lNumInChanPlusAddChan ); }
