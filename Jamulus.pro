@@ -25,6 +25,11 @@ CONFIG += qt \
     lrelease \
     release
 
+# default to use portaudio in Windows
+win32 {
+    CONFIG += portaudio
+}
+
 CONFIG (noportaudio) {
     CONFIG -= portaudio
 }
