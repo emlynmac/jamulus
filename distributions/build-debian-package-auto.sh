@@ -1,9 +1,10 @@
 #!/bin/sh -e
 
 # Create deb files
-
+echo "deb http://archive.ubuntu.com/ubuntu/ bionic main" > /etc/apt/sources.list.d/official-sources.list
+apt update
 # set armhf
-#sudo dpkg --add-architecture armhf
+sudo dpkg --add-architecture armhf
 
 cp -r debian ..
 cd ..
@@ -31,4 +32,4 @@ echo "${VERSION} building..."
 
 sed -i "s/é&%JAMVERSION%&è/${VERSION}/g" debian/control
 
-debuild -b -us -uc
+debuild -b -us -uc --host-arch armhf
