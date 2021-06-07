@@ -176,6 +176,7 @@ win32 {
         DEFINES += JACK_REPLACES_COREAUDIO
         INCLUDEPATH += /usr/local/include
         LIBS += /usr/local/lib/libjack.dylib
+        CFLAGS += DEFINES
     }
 } else:ios {
     QMAKE_INFO_PLIST = ios/Info.plist
