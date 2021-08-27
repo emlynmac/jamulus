@@ -258,8 +258,10 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     lblGlobalInfoLabel->hide();
 
     // prepare update check info label (invisible by default)
-    lblUpdateCheck->setOpenExternalLinks ( true );
-    lblUpdateCheck->setText ( "<font color=\"#c94a55\"><b>" + QString ( "%1 upgrade available. " ) .arg ( APP_NAME ) + tr ( "<a style='color:#c94a55;' href='https://jamulus.io/download'>Update now!</a>" ) + "</b></font>" );
+    lblUpdateCheck->setOpenExternalLinks ( true ); // enables opening a web browser if one clicks on a html link
+    lblUpdateCheck->setText (
+        "<font color=\"#c94a55\"><b>" + tr ( "A %1 upgrade is available. " ).arg ( APP_NAME ) +
+        tr ( "<a style='color:#c94a55;' href='https://jamulus.io/upgrade?progversion=%1'>Click for details</a>" ).arg ( VERSION ) + "</b></font>" );
     lblUpdateCheck->hide();
 
     // setup timers
