@@ -331,7 +331,8 @@ lvwClients->setMinimumHeight ( 140 );
     tedWelcomeMessage->setText ( pServer->GetWelcomeMessage() );
 
     // prepare update check info label (invisible by default)
-    lblUpdateCheck->setText ( "<font color=\"red\"><b>" + QString ( APP_NAME ) + " " + tr ( "software upgrade available" ) + "</b></font>" );
+    lblUpdateCheck->setOpenExternalLinks ( true );
+    lblUpdateCheck->setText ( "<font color=\"#c94a55\"><b>" + QString ( "%1 upgrade available. " ) .arg ( APP_NAME ) + tr ( "<a style='color:#c94a55;' href='https://jamulus.io/download'>Update now!</a>" ) + "</b></font>" );
     lblUpdateCheck->hide();
 
     // update GUI dependencies
