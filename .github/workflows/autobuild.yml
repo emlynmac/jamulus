@@ -279,7 +279,7 @@ jobs:
     steps:
       - name:                       Select Xcode version for Mac
         if:                         matrix.config.target_os == 'macos' || matrix.config.target_os == 'ios'
-        uses:                       maxim-lobanov/setup-xcode@4aa4176a819ae7c019451acfda0bba67bffc6704
+        uses:                       maxim-lobanov/setup-xcode@9a697e2b393340c3cacd97468baa318e4c883d98
         with:
           xcode-version:            ${{ matrix.config.xcode_version }}
 
