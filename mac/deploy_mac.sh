@@ -81,7 +81,12 @@ build_app() {
     if [[ -z "$cert_name" ]]; then
         macdeployqt "${build_path}/${target_name}.app" -verbose=2 -always-overwrite -codesign="-"
     else
-        macdeployqt "${build_path}/${target_name}.app" -verbose=2 -always-overwrite -hardened-runtime -timestamp -appstore-compliant -sign-for-notarization="${cert_name}"
+        # CodeQL sets DYLD_INSERT_LIBRARIES DYLIB.
+        # Mac doesn't allow some binaries (codesign?) to load additional libs
+        # like that. Instead, it supposedly generates a GUI warning, which we
+        # can't handle.
+        # Therefore, disable CodeQL lib loading for the actual signing process:
+        DYLD_INSERT_LIBRARIES= macdeployqt "${build_path}/${target_name}.app" -verbose=2 -always-overwrite -hardened-runtime -timestamp -appstore-compliant -sign-for-notarization="${cert_name}"
     fi
     mv "${build_path}/${target_name}.app" "${deploy_path}"
 
