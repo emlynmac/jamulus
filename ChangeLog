@@ -1,7 +1,7 @@
 ### 3.9.1dev <- NOTE: the release version number will be 3.9.2 ###
 
 
-### 3.9.1 (2022-10-17) ###
+### 0.3.9.1 (2022-10-17) ###
 
 - Client: Improved performance of GUI when someone joins or leaves a server (#2738).
   (contributed by @ann0see)
