@@ -1,5 +1,7 @@
 #!/bin/bash
 set -eu -o pipefail
+# FOR TESTING ONLY:
+export DYLD_INSERT_LIBRARIES=
 
 root_path=$(pwd)
 project_path="${root_path}/Jamulus.pro"
