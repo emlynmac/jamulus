@@ -423,8 +423,8 @@ jobs:
           pushd repo
           apt-ftparchive packages . > Packages
           apt-ftparchive release . > Release
-          gpg --homedir "gpghome" --armor --yes --clearsign --output InRelease --detach-sign Release
-          gpg --homedir "gpghome" --armor --export > "key.asc"
+          gpg --homedir "../gpghome" --armor --yes --clearsign --output InRelease --detach-sign Release
+          gpg --homedir "../gpghome" --armor --export > "key.asc"
           popd
 
       - name:                       Upload Packages file to release
