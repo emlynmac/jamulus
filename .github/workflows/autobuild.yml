@@ -430,7 +430,14 @@ jobs:
           cd ..
 
       - name:                        Upload deb repo metadata
-        uses:                        actions/upload-artifact@v3
+        uses:                        softprops/action-gh-release@v1
         with:
-          name:                      repo-metadata
-          path:                      repo
+          files:                     |
+            Packages
+            InRelease
+            Release
+            key.asc
+          append_body:               true
+          body:                      |
+            Debian/Ubuntu users can also use the Debian repository for automatic updates. See [the Linux install guide](https://jamulus.io/wiki/Installation-for-Linux).
+
