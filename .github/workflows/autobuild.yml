@@ -388,7 +388,7 @@ jobs:
         uses:                       github/codeql-action/analyze@v2
 
   create_deb_repo:
-    name:                           Create files for .deb repository
+    name:                           Create files for .deb repository (if requested)
     runs-on:                        ubuntu-22.04
     needs:                          [create_release, release_assets]
     if:                             needs.create_release.outputs.publish_to_release == 'true'
@@ -423,7 +423,7 @@ jobs:
 
           apt-ftparchive packages ./repo/ > ./repo/Packages
           apt-ftparchive release ./repo/ > ./repo/Release
-          gpg --homedir "gpghome" --armor --yes --clearsign --output InRelease --detach-sign ./repo/Release
+          gpg --homedir "gpghome" --armor --yes --clearsign --output ./repo/InRelease --detach-sign ./repo/Release
           gpg --homedir "gpghome" --armor --export > "repo/key.asc"
 
       - name:                       Upload Packages file to release
