@@ -429,15 +429,44 @@ jobs:
 
           cd ..
 
-      - name:                        Upload deb repo metadata
-        uses:                        softprops/action-gh-release@v1
+      - name:                       Upload Packages file to release
+        id:                         deb-upload-packagesfile
+        uses:                       actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
         with:
-          files:                     |
-            Packages
-            InRelease
-            Release
-            key.asc
-          append_body:               true
-          body:                      |
-            Debian/Ubuntu users can also use the Debian repository for automatic updates. See [the Linux install guide](https://jamulus.io/wiki/Installation-for-Linux).
+          upload_url:               ${{ needs.create_release.outputs.upload_url }}
+          asset_path:               repo/Packages
+          asset_name:               Packages
+          asset_content_type:       text/plain
+      - name:                       Upload Release file to release
+        id:                         deb-upload-releasefile
+        uses:                       actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url:               ${{ needs.create_release.outputs.upload_url }}
+          asset_path:               repo/Release
+          asset_name:               Release
+          asset_content_type:       message/rfc822
+      - name:                       Upload InRelease file to release
+        id:                         deb-upload-inreleasefile
+        uses:                       actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url:               ${{ needs.create_release.outputs.upload_url }}
+          asset_path:               repo/InRelease
+          asset_name:               InRelease
+          asset_content_type:       text/PGP
+      - name:                       Upload Key file to release
+        id:                         deb-upload-keyascfile
+        uses:                       actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url:               ${{ needs.create_release.outputs.upload_url }}
+          asset_path:               repo/key.asc
+          asset_name:               key.asc
+          asset_content_type:       application/pgp-keys
 
