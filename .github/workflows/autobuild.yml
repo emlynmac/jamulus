@@ -413,11 +413,17 @@ jobs:
       # Unfortunately download-artifact action doesn't support wild card downloads. Thus downloading all artifacts
       - name:                       Download all artifacts
         uses:                       actions/download-artifact@v3
+        with:
+          path:                     releasedl/
       - name:                       Create debian repository
         run:                        |
           set -eu
+          ls -la releasedl/
 
-          # create repo files. Should only detect .deb files
+          mv releasedl/*.deb .
+          rm -rf releasedl
+
+          # create repo files. Should only detect .deb files; not gpghome
           apt-ftparchive packages . > Packages
           apt-ftparchive release . > Release
           gpg --homedir "gpghome" --armor --yes --clearsign --output InRelease --detach-sign Release
