@@ -417,15 +417,12 @@ jobs:
         run:                        |
           set -eu
 
-          mkdir repo
-          mv *.deb repo
-          # create all needed metadata files in repo subfolder
-          pushd repo
+          # create repo files. Should only detect .deb files
           apt-ftparchive packages . > Packages
           apt-ftparchive release . > Release
-          gpg --homedir "../gpghome" --armor --yes --clearsign --output InRelease --detach-sign Release
-          gpg --homedir "../gpghome" --armor --export > "key.asc"
-          popd
+          gpg --homedir "gpghome" --armor --yes --clearsign --output InRelease --detach-sign Release
+          gpg --homedir "gpghome" --armor --export > "key.asc"
+
 
       - name:                       Upload Packages file to release
         id:                         deb-upload-packagesfile
@@ -434,7 +431,7 @@ jobs:
           GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:               ${{ needs.create_release.outputs.upload_url }}
-          asset_path:               repo/Packages
+          asset_path:               Packages
           asset_name:               Packages
           asset_content_type:       text/plain
       - name:                       Upload Release file to release
@@ -444,7 +441,7 @@ jobs:
           GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:               ${{ needs.create_release.outputs.upload_url }}
-          asset_path:               repo/Release
+          asset_path:               Release
           asset_name:               Release
           asset_content_type:       message/rfc822
       - name:                       Upload InRelease file to release
@@ -454,7 +451,7 @@ jobs:
           GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:               ${{ needs.create_release.outputs.upload_url }}
-          asset_path:               repo/InRelease
+          asset_path:               InRelease
           asset_name:               InRelease
           asset_content_type:       text/PGP
       - name:                       Upload Key file to release
@@ -464,7 +461,7 @@ jobs:
           GITHUB_TOKEN:             ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url:               ${{ needs.create_release.outputs.upload_url }}
-          asset_path:               repo/key.asc
+          asset_path:               key.asc
           asset_name:               key.asc
           asset_content_type:       application/pgp-keys
 
