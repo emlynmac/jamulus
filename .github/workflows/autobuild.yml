@@ -418,16 +418,13 @@ jobs:
           set -eu
 
           mkdir repo
-          mv *.deb repo/
-          # In the repo subfolder create all needed metadata files
-          cd repo
+          mv *.deb repo
+          # create all needed metadata files
 
-          apt-ftparchive packages . > Packages
-          apt-ftparchive release . > Release
-          gpg --homedir "../gpghome" --armor --yes --clearsign --output InRelease --detach-sign Release
-          gpg --homedir "../gpghome" --armor --export > "key.asc"
-
-          cd ..
+          apt-ftparchive packages ./repo/ > ./repo/Packages
+          apt-ftparchive release ./repo/ > ./repo/Release
+          gpg --homedir "gpghome" --armor --yes --clearsign --output InRelease --detach-sign ./repo/Release
+          gpg --homedir "gpghome" --armor --export > "repo/key.asc"
 
       - name:                       Upload Packages file to release
         id:                         deb-upload-packagesfile
